@@ -24,15 +24,15 @@
          visited (atom #{})
          seen (atom #{starting-node})]
     (while (not-empty @queue)
-      (println (peek @queue))
       (let [current-node (peek @queue)]
         (swap! queue pop)
         (swap! visited conj current-node)
         (let [neighbors (get-neighbors graph current-node)]
-          (doseq [neighbor neighbors :when (and (not (contains? @seen neighbor))
-                                                (if (nil? id-predicate?) true (id-predicate? neighbor))
-                                                (if (nil? value-predicate?) true (value-predicate? (get-value graph neighbor))))]
-
-            (swap! queue conj neighbor)
+          (doseq [neighbor neighbors]
+            (when (and (not (contains? @seen neighbor))
+                       (if (nil? id-predicate?) true (id-predicate? neighbor))
+                       (if (nil? value-predicate?) true (value-predicate? (get-value graph neighbor))))
+              (swap! queue conj neighbor)
+              (swap! seen conj neighbor))
             (swap! seen conj neighbor)))))
     {:visited @visited :seen @seen}))
