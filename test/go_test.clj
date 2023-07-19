@@ -6,26 +6,51 @@
 (deftest create-board
   (let [board (go/square-board-board 9)]
     (is (every? #(contains? board %) [:board :size]))
-    (is (= 81 (count (get-in board [:board :values]))))
-    (is (= 9 (:size board)))))
+    (is (= (count (get-in board [:board :values])) 81))
+    (is (= (:size board) 9))))
+
+(deftest get-liberties-simple
+  (let [board (-> (go/square-board-board 9)
+                  (go/put-stone [0 0] :black)
+                  (go/put-stone [0 3] :black)
+                  (go/put-stone [3 3] :black))]
+    (is (= (go/get-liberties board [0 0]) 2))
+    (is (= (go/get-liberties board [0 3]) 3))
+    (is (= (go/get-liberties board [3 3]) 4))))
+
+(deftest get-liberties-multiple
+  (let [board (-> (go/square-board-board 9)
+                  (go/put-stone [0 0] :white)
+                  (go/put-stone [1 0] :white)
+                  (go/put-stone [2 0] :white)
+                  (go/put-stone [0 1] :black)
+                  (go/put-stone [1 1] :black)
+                  (go/put-stone [2 1] :black))]
+    (is (= (go/get-liberties board [0 0]) 1))))
 
 (deftest put-stone
   (let [board (go/square-board-board 9)
         board (go/put-stone board [0 0] :white)]
-    (is (= :white (go/get-at board [0 0])))))
+    (is (= (go/get-at board [0 0]) :white))))
 
 (deftest put-stone-suicide
   (let [board (-> (go/square-board-board 9)
                   (go/put-stone [1 0] :white)
                   (go/put-stone [0 1] :white))]
-    (is (= board (go/put-stone board [0 0] :black)))))
+    (is (= (go/put-stone board [0 0] :black) board))))
+
+(deftest put-stone-not-replace
+  (let [board (-> (go/square-board-board 9)
+                  (go/put-stone [0 0] :white)
+                  (go/put-stone [0 0] :black))]
+    (is (= (go/get-at board [0 0]) :white))))
 
 (deftest put-stone-update
   (let [board (-> (go/square-board-board 9)
                   (go/put-stone [0 0] :white)
                   (go/put-stone [1 0] :black)
                   (go/put-stone [0 1] :black))]
-    (is (= nil (go/get-at board [0 0])))))
+    (is (= (go/get-at board [0 0]) nil))))
 
 (defn count-elements [data]
   (walk/prewalk
@@ -38,6 +63,6 @@
 (deftest square-board-graph
   (let [board (go/square-board-board 9)
         graph (:board board)]
-    (is (= 81 (count (:values graph))))
-    (is (= 81 (count (:neighbors graph))))
+    (is (= (count (:values graph)) 81))
+    (is (= (count (:neighbors graph)) 81))
     (is (every? (fn [[k v]] (<= v 4)) (count-elements (:neighbors graph))))))
