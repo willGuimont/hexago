@@ -14,6 +14,12 @@
         board (go/put-stone board [0 0] :white)]
     (is (= :white (go/get-at board [0 0])))))
 
+(deftest put-stone-suicide
+  (let [board (-> (go/square-board-board 9)
+                  (go/put-stone [1 0] :white)
+                  (go/put-stone [0 1] :white))]
+    (is (= board (go/put-stone board [0 0] :black)))))
+
 (deftest put-stone-update
   (let [board (-> (go/square-board-board 9)
                   (go/put-stone [0 0] :white)

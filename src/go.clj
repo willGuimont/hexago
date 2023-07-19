@@ -4,6 +4,7 @@
 (defn make-board [graph size]
   {:board graph :size size})
 
+; TODO kill stones
 (defn update-board [board [i j]]
   board)
   ;(if (<= 0 i))
@@ -13,6 +14,7 @@
   ;    (update-board [(inc i) j])
   ;    (update-board [i (inc j)]))
 
+; TODO do not let place a stone if it's a suicide
 (defn put-stone [board position color]
   (let [graph (:board board)
         board (g/set-node graph position color)
