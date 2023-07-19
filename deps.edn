@@ -1,7 +1,10 @@
-{:deps {org.clojure/test.check {:mvn/version "1.1.1"}}
+{:deps {org.clojure/clojure {:mvn/version "1.11.1"}
+        org.clojure/test.check {:mvn/version "1.1.1"}
+        quil/quil {:mvn/version "4.0.0-SNAPSHOT"}}
+
  :aliases
  {:test {:extra-paths ["test"]
-         :extra-deps {org.clojure/test.check {:mvn/version "1.1.1"}}
-         :main-opts ["-m" "clojure.test"
-                     "-e" "(run-tests)"]}}}
-
+         :extra-deps  {
+                       org.clojure/test.check {:mvn/version "1.1.1"}}
+         :main-opts   ["-m" "clojure.test"
+                       "-e" "(run-tests)"]}}}
