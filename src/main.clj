@@ -14,9 +14,11 @@
         y (q/random (q/height))]
     (q/ellipse x y diam diam)))
 
-(defn -main []
+(defn -main [& args]
+  (let [mode (or (first args) "square")]
+    (println mode))
   (q/defsketch example
-               :title "Oh so many grey circles"
+               :title "Hexago"
                :settings #(q/smooth 2)
                :setup setup
                :draw draw
