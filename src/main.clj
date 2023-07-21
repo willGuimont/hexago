@@ -12,6 +12,8 @@
 (def stone-size (atom 10))
 (def game (atom nil))
 (def cell-positions (atom {}))
+(def game-state (atom :playing))
+(def removed-stones (atom #{}))
 
 ; Board specific functions
 (defn pos-to-screen [[i j]]
@@ -29,7 +31,7 @@
   (q/frame-rate 30))
 
 (defn draw-lines []
-  (q/color 0)
+  (q/stroke 0)
   (doseq [[pos [x1 y1]] @cell-positions]
     (let [neighbors (g/get-neighbors-at @game pos)]
       (doseq [n neighbors]
@@ -37,14 +39,16 @@
           (q/line x1 y1 x2 y2))))))
 
 (defn set-draw-color [turn & {:keys [transparency] :or {transparency 255}}]
-  (cond (= turn :black) (do (q/color 255 255 255 transparency) (q/fill 0 0 0 transparency))
-        (= turn :white) (do (q/color 0 0 0 transparency) (q/fill 255 255 255 transparency))))
+  (cond (= turn :black) (do (q/stroke 0 0 0 transparency) (q/fill 0 0 0 transparency))
+        (= turn :white) (do (q/stroke 0 0 0 transparency) (q/fill 255 255 255 transparency))))
 
 (defn draw-stones []
   (doseq [[pos [x y]] @cell-positions]
     (let [color (g/get-at @game pos)]
-      (when (not= color nil)
-        (set-draw-color color)
+      (when (and (not= color nil))
+        (if (and (= :remove-dead @game-state) (contains? @removed-stones pos))
+          (set-draw-color color :transparency 127)
+          (set-draw-color color))
         (q/ellipse x y @stone-size @stone-size)))))
 
 (defn distance [x1 y1 x2 y2]
@@ -57,21 +61,32 @@
     (first (apply min-key second distances))))
 
 (defn draw-mouse-over []
-  (let [x (q/mouse-x)
-        y (q/mouse-y)]
-    (let [pos (find-closest-key @cell-positions [x y])
-          [sx sy] (get @cell-positions pos)
-          color (g/get-turn @game)
-          already-drawn (g/get-at @game pos)]
-      (when (= nil already-drawn)
-        (set-draw-color color :transparency 127)
-        (q/ellipse sx sy @stone-size @stone-size)))))
+  (when (= :playing @game-state)
+    (let [x (q/mouse-x)
+          y (q/mouse-y)]
+      (let [pos (find-closest-key @cell-positions [x y])
+            [sx sy] (get @cell-positions pos)
+            color (g/get-turn @game)
+            already-drawn (g/get-at @game pos)]
+        (when (= nil already-drawn)
+          (set-draw-color color :transparency 127)
+          (q/ellipse sx sy @stone-size @stone-size))))))
 
-(defn draw-instruction []
-  (q/color 0)
+(defn draw-text []
+  (q/stroke 0)
   (q/fill 0)
   (q/text-size 25)
-  (q/text "Space to pass" 0 25))
+  (cond
+    (= :playing @game-state) (q/text "Space to pass" 5 25)
+    (= :remove-dead @game-state) (q/text "Click to remove stone, space to finish" 5 25)
+    (= :score @game-state) (q/text "Game finished" 5 25)))
+
+(defn draw-score []
+  (q/stroke 0)
+  (q/fill 0)
+  (q/text-size 25)
+  (let [score (:score @game)]
+    (q/text (str "Black: " (:black score) "\nWhite: " (:white score)) 5 (- height 50))))
 
 ; TODO score when the game is finished
 (defn draw []
@@ -79,18 +94,33 @@
   (draw-lines)
   (draw-stones)
   (draw-mouse-over)
-  (draw-instruction))
+  (draw-score)
+  (draw-text))
 
 (defn mouse-clicked []
   (let [x (q/mouse-x)
         y (q/mouse-y)
         pos (find-closest-key @cell-positions [x y])]
-    (swap! game g/play-turn pos)))
+    (cond
+      (= :playing @game-state) (swap! game g/play-turn pos)
+      (= :remove-dead @game-state) (swap! removed-stones (if (contains? @removed-stones pos) disj conj) pos)
+      (= :score @game-state) (do))))
 
 (defn key-pressed []
   (let [raw-key (q/raw-key)]
     (when (= raw-key \space)
-      (swap! game g/pass))))
+      (cond
+        (= :playing @game-state) (do
+                                   (swap! game g/pass)
+                                   (when (g/finished? @game)
+                                     (reset! game-state :remove-dead)))
+        (= :remove-dead @game-state) (do
+                                       (reset! game-state :score)
+                                       (doseq [s @removed-stones]
+                                         (swap! game g/remove-stone s))
+                                       (swap! game g/score))
+        (= :score @game-state) (do)))))
+
 
 ; Main
 (defn -main [& args]
