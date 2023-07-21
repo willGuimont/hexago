@@ -19,7 +19,7 @@
     (-> graph
         (assoc-in [:neighbors from] new-neighbors))))
 
-(defn breadth-first-search [graph starting-node & {:keys [value-predicate? id-predicate?]}]
+(defn search [graph starting-node & {:keys [value-predicate? id-predicate?]}]
   (loop [queue (atom [starting-node])
          visited (atom #{})
          seen (atom #{starting-node})]

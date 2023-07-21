@@ -19,7 +19,7 @@
   (let [graph (:graph board)
         color (get-at board position)
         value-pred? #(= % color)
-        search (g/breadth-first-search graph position :value-predicate? value-pred?)
+        search (g/search graph position :value-predicate? value-pred?)
         liberties (filter #(= nil (get-at board %)) (:seen search))]
     (if (= nil color)
       0
@@ -28,7 +28,7 @@
 (defn kill-group-if-stuck- [board position]
   (let [color (get-at board position)
         liberties (get-liberties board position)
-        search (g/breadth-first-search (:graph board) position :value-predicate? #(= % color))
+        search (g/search (:graph board) position :value-predicate? #(= % color))
         visited (:visited search)
         new-board (atom board)]
     (if (or (= nil color) (not= 0 liberties))
