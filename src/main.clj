@@ -97,8 +97,10 @@
   ; TODO make a better CLI interface
   (let [mode (or (first args) "square")
         size (or (second args) 9)]
+    ; TODO add hexagonal grid
     (reset! game (cond
                    (= "square" mode) (g/make-square-game size)))
+    ; TODO add hexagonal grid
     (reset! cell-positions (cond
                              (= "square" mode) (square-cell-positions)))
     (reset! stone-size (/ board-width size)))
