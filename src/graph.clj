@@ -6,7 +6,7 @@
 (defn get-value [graph id]
   (get-in graph [:values id]))
 
-(defn get-neighbors [graph id]
+(defn get-neighbors-at [graph id]
   (get-in graph [:neighbors id] #{}))
 
 (defn set-node [graph id value]
@@ -14,7 +14,7 @@
       (assoc-in [:values id] value)))
 
 (defn add-edge [graph from to]
-  (let [neighbors (get-neighbors graph from)
+  (let [neighbors (get-neighbors-at graph from)
         new-neighbors (conj neighbors to)]
     (-> graph
         (assoc-in [:neighbors from] new-neighbors))))
@@ -27,7 +27,7 @@
       (let [current-node (peek @queue)]
         (swap! queue pop)
         (swap! visited conj current-node)
-        (let [neighbors (get-neighbors graph current-node)]
+        (let [neighbors (get-neighbors-at graph current-node)]
           (doseq [neighbor neighbors]
             (when (and (not (contains? @seen neighbor))
                        (if (nil? id-predicate?) true (id-predicate? neighbor))

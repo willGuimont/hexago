@@ -7,6 +7,9 @@
 (defn get-at [board position]
   (g/get-value (:graph board) position))
 
+(defn get-neighbors-at [board position]
+  (g/get-neighbors-at (:graph board) position))
+
 (defn remove-at- [board position]
   (let [graph (:graph board)
         graph (g/set-node graph position nil)]

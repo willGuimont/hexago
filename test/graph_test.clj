@@ -22,9 +22,9 @@
                   (g/set-node :C 3)
                   (g/add-edge :A :B)
                   (g/add-edge :A :C))]
-    (is (contains? (g/get-neighbors graph :A) :B))
-    (is (contains? (g/get-neighbors graph :A) :C))
-    (is (= (g/get-neighbors graph :B) #{}))))
+    (is (contains? (g/get-neighbors-at graph :A) :B))
+    (is (contains? (g/get-neighbors-at graph :A) :C))
+    (is (= (g/get-neighbors-at graph :B) #{}))))
 
 (deftest breadth-first-search
   (let [graph (-> (g/make-graph)
