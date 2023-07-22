@@ -16,7 +16,7 @@
 (def removed-stones (atom #{}))
 
 ; Board specific functions
-(defn pos-to-screen [[i j]]
+(defn pos-to-screen-square [[i j]]
   (let [size (dec (get-in @game [:board :size]))
         x (+ board-offset-x (* board-width (/ i size)))
         y (+ board-offset-y (* board-height (/ j size)))]
@@ -24,7 +24,15 @@
 
 (defn square-cell-positions []
   (let [cs (g/get-cells @game)]
-    (zipmap cs (map pos-to-screen cs))))
+    (zipmap cs (map pos-to-screen-square cs))))
+
+(defn pos-to-screen-tri [[i j]])
+
+(defn tri-cell-positions [])
+
+(defn pos-to-screen-hexa [[i j]])
+
+(defn hexa-cell-positions [])
 
 ; Sketch functions
 (defn setup []
@@ -36,6 +44,9 @@
     (let [neighbors (g/get-neighbors-at @game pos)]
       (doseq [n neighbors]
         (let [[x2 y2] (get @cell-positions n)]
+          (println "---")
+          (println x1 y1 x2 y2)
+          (println n)
           (q/line x1 y1 x2 y2))))))
 
 (defn set-draw-color [turn & {:keys [transparency] :or {transparency 255}}]
@@ -88,7 +99,6 @@
   (let [score (:score @game)]
     (q/text (str "Black: " (:black score) "\nWhite: " (:white score)) 5 (- height 50))))
 
-; TODO score when the game is finished
 (defn draw []
   (q/background 200)
   (draw-lines)
@@ -127,13 +137,18 @@
   ; TODO make a better CLI interface
   (let [mode (or (first args) "square")
         size (or (second args) 9)]
-    ; TODO add hexagonal grid
+    ; TODO tri and hexa board
     (reset! game (cond
-                   (= "square" mode) (g/make-square-game size)))
-    ; TODO add hexagonal grid
+                   (= "square" mode) (g/make-square-game size)
+                   (= "tri" mode) (g/make-tri-game size)
+                   (= "hexa" mode) (g/make-hexa-game size)))
     (reset! cell-positions (cond
-                             (= "square" mode) (square-cell-positions)))
+                             (= "square" mode) (square-cell-positions)
+                             (= "tri" mode) (tri-cell-positions)
+                             (= "hexa" mode) (hexa-cell-positions)))
     (reset! stone-size (/ board-width size)))
+  (println @game)
+  (println @cell-positions)
   (q/defsketch hexago
                :title "Hexago"
                :size [width height]

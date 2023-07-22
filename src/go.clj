@@ -73,6 +73,10 @@
             (swap! graph g/add-edge [i prev-j] [i j])))))
     (make-board @graph size)))
 
+(defn make-tri-board [size])
+
+(defn make-hexa-board [size])
+
 (defn score [board]
   (let [graph (:graph board)
         values (:values graph)
