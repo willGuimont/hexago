@@ -44,9 +44,6 @@
     (let [neighbors (g/get-neighbors-at @game pos)]
       (doseq [n neighbors]
         (let [[x2 y2] (get @cell-positions n)]
-          (println "---")
-          (println x1 y1 x2 y2)
-          (println n)
           (q/line x1 y1 x2 y2))))))
 
 (defn set-draw-color [turn & {:keys [transparency] :or {transparency 255}}]
@@ -134,7 +131,6 @@
 
 ; Main
 (defn -main [& args]
-  ; TODO make a better CLI interface
   (let [mode (or (first args) "square")
         size (or (second args) 9)]
     ; TODO tri and hexa board
@@ -147,8 +143,6 @@
                              (= "tri" mode) (tri-cell-positions)
                              (= "hexa" mode) (hexa-cell-positions)))
     (reset! stone-size (/ board-width size)))
-  (println @game)
-  (println @cell-positions)
   (q/defsketch hexago
                :title "Hexago"
                :size [width height]
