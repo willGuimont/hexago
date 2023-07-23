@@ -29,7 +29,7 @@
         half-size (quot full-size 2)
         dj (if (<= i half-size) (- half-size i) (- i half-size))
         board-offset-x (- board-offset-x (/ px-size 2))
-        board-offset-y (- board-offset-y (/ px-size 2))
+        board-offset-y (- board-offset-y px-size)
         x (+ board-offset-x (* (Math/sqrt (/ 3 4)) (* i px-size)))
         y (+ board-offset-y (* (/ px-size 2) dj) (* j px-size))]
     [x y]))
