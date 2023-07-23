@@ -1,6 +1,5 @@
 (ns go
   (:require [clojure.set :as set]
-            [clojure.set :as s]
             [graph :as g]))
 
 (defn make-board [graph size]
@@ -120,5 +119,5 @@
           (let [color (first seen-color)]
             (swap! score update-in [:score color] + num-empty)
             (swap! score update-in [:territory color] set/union visited)))
-        (swap! empty-pos s/difference seen-pos)))
+        (swap! empty-pos set/difference seen-pos)))
     @score))
