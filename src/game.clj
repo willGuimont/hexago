@@ -7,9 +7,6 @@
 (defn make-square-game [size]
   (make-game (go/make-square-board size)))
 
-(defn make-tri-game [size]
-  (make-game (go/make-tri-board size)))
-
 (defn make-hexa-game [size]
   (make-game (go/make-hexa-board size)))
 

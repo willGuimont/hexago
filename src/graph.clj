@@ -1,4 +1,5 @@
-(ns graph)
+(ns graph
+  (:require [clojure.set :as set]))
 
 (defn make-graph []
   {:values {} :neighbors {}})
@@ -36,3 +37,13 @@
               (swap! seen conj neighbor))
             (swap! seen conj neighbor)))))
     {:visited @visited :seen @seen}))
+
+(defn map-vals- [f m] (reduce-kv (fn [m k v] (assoc m k (f v))) {} m))
+
+(defn prune [graph]
+  (let [nodes (set (keys (:values graph)))
+        ns (:neighbors graph)
+        new-ns (select-keys ns nodes)
+        new-ns (map-vals- (partial set/intersection nodes) new-ns)]
+    (-> graph
+        (assoc :neighbors new-ns))))

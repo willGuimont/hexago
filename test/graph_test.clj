@@ -58,3 +58,16 @@
         search (g/search graph :A :id-predicate? #(not= % :C))]
     (is (= (:visited search) #{:A :B}))
     (is (= (:seen search) #{:A :B :C}))))
+
+(deftest prune
+  (let [graph (-> (g/make-graph)
+                  (g/set-node :A 1)
+                  (g/set-node :B 2)
+                  (g/set-node :C 3)
+                  (g/add-edge :A :B)
+                  (g/add-edge :A :C)
+                  (g/add-edge :A :E)
+                  (g/add-edge :D :A)
+                  (g/prune))]
+    (is (= (count (:neighbors graph)) 1))
+    (is (= (count (get-in graph [:neighbors :A])) 2))))

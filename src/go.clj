@@ -3,7 +3,7 @@
             [graph :as g]))
 
 (defn make-board [graph size]
-  {:graph graph :size size})
+  {:graph (g/prune graph) :size size})
 
 (defn get-at [board position]
   (g/get-value (:graph board) position))
@@ -41,11 +41,7 @@
     {:board @new-board :kill @new-kills}))
 
 (defn update-board- [board [i j]]
-  (-> {:board board :kill 0}
-      (kill-group-if-stuck- [(dec i) j])
-      (kill-group-if-stuck- [(inc i) j])
-      (kill-group-if-stuck- [i (dec j)])
-      (kill-group-if-stuck- [i (inc j)])))
+  (reduce kill-group-if-stuck- {:board board :kill 0} (get-neighbors-at board [i j])))
 
 (defn put-stone [board position color]
   (let [graph (:graph board)
@@ -58,6 +54,11 @@
           {:board updated-board :kill kill}))
       nil)))
 
+(defn add-edges- [graph x y]
+  (-> graph
+      (g/add-edge x y)
+      (g/add-edge y x)))
+
 (defn make-square-board [size]
   (let [graph (atom (g/make-graph))]
     (dotimes [i size]
@@ -65,17 +66,39 @@
         (swap! graph g/set-node [i j] nil)
         (when (< 0 i)
           (let [prev-i (dec i)]
-            (swap! graph g/add-edge [i j] [prev-i j])
-            (swap! graph g/add-edge [prev-i j] [i j])))
+            (swap! graph add-edges- [i j] [prev-i j])))
         (when (< 0 j)
           (let [prev-j (dec j)]
-            (swap! graph g/add-edge [i j] [i prev-j])
-            (swap! graph g/add-edge [i prev-j] [i j])))))
+            (swap! graph add-edges- [i j] [i prev-j])))))
     (make-board @graph size)))
 
-(defn make-tri-board [size])
-
-(defn make-hexa-board [size])
+(defn make-hexa-board [size]
+  (let [graph (atom (g/make-graph))
+        full-size (inc (* 2 (dec size)))
+        half-size (quot full-size 2)]
+    (dotimes [i full-size]
+      (let [get-iter #(+ size (if (<= % half-size) % (- full-size (inc %))))
+            num-iter (get-iter i)
+            dec-num-iter (dec num-iter)
+            i-gt (< 0 i)
+            prev-i (dec i)]
+        (dotimes [j num-iter]
+          (let [prev-j (dec j)
+                j-gt (< 0 j)
+                next-j (inc j)
+                next-j-prev-row (dec (get-iter prev-i))]
+            (swap! graph g/set-node [i j] nil)
+            (when i-gt
+              (swap! graph add-edges- [i j] [prev-i j]))
+            (when j-gt
+              (swap! graph add-edges- [i j] [i prev-j]))
+            (when (and i-gt j-gt (<= i half-size))
+              (swap! graph add-edges- [i j] [prev-i prev-j]))
+            (when (and (= j dec-num-iter) i-gt)
+              (swap! graph add-edges- [i j] [prev-i next-j-prev-row]))
+            (when (and (> i half-size) (< j num-iter))
+              (swap! graph add-edges- [i j] [prev-i next-j]))))))
+    (make-board @graph size)))
 
 (defn score [board]
   (let [graph (:graph board)

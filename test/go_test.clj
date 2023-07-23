@@ -67,12 +67,20 @@
         x))
     data))
 
-(deftest square-board-graph
+(deftest make-square-board
   (let [board (go/make-square-board 9)
         graph (:graph board)]
     (is (= (count (:values graph)) 81))
     (is (= (count (:neighbors graph)) 81))
-    (is (every? (fn [[k v]] (<= v 4)) (count-elements (:neighbors graph))))))
+    (is (every? (fn [[_ v]] (<= v 4)) (count-elements (:neighbors graph))))))
+
+(deftest make-hexa-board
+  (let [board (go/make-hexa-board 4)
+        graph (:graph board)]
+    (is (= (count (:values graph)) 37))
+    (is (= (count (:neighbors graph)) 37))
+    (is (every? (fn [[_ v]] (<= v 6)) (count-elements (:neighbors graph))))))
+
 
 (deftest score
   (let [board (go/make-square-board 3)

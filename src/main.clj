@@ -16,27 +16,32 @@
 (def removed-stones (atom #{}))
 
 ; Board specific functions
-(defn pos-to-screen-square [[i j]]
+(defn square-pos-to-screen [[i j]]
   (let [size (dec (get-in @game [:board :size]))
         x (+ board-offset-x (* board-width (/ i size)))
         y (+ board-offset-y (* board-height (/ j size)))]
     [x y]))
 
-(defn square-cell-positions []
+(defn hexa-pos-to-screen [[i j]]
+  (let [size (get-in @game [:board :size])
+        full-size (inc (* 2 (dec size)))
+        px-size (* board-width (/ 1 size 1.25))
+        half-size (quot full-size 2)
+        dj (if (<= i half-size) (- half-size i) (- i half-size))
+        board-offset-x (- board-offset-x (/ px-size 2))
+        board-offset-y (- board-offset-y (/ px-size 2))
+        x (+ board-offset-x (* (Math/sqrt (/ 3 4)) (* i px-size)))
+        y (+ board-offset-y (* (/ px-size 2) dj) (* j px-size))]
+    [x y]))
+
+(defn make-cell-positions [f]
   (let [cs (g/get-cells @game)]
-    (zipmap cs (map pos-to-screen-square cs))))
-
-(defn pos-to-screen-tri [[i j]])
-
-(defn tri-cell-positions [])
-
-(defn pos-to-screen-hexa [[i j]])
-
-(defn hexa-cell-positions [])
+    (zipmap cs (map f cs))))
 
 ; Sketch functions
 (defn setup []
-  (q/frame-rate 30))
+  (q/frame-rate 30)
+  (q/smooth 2))
 
 (defn draw-lines []
   (q/stroke 0)
@@ -128,21 +133,20 @@
                                        (swap! game g/score))
         (= :score @game-state) (do)))))
 
-
 ; Main
 (defn -main [& args]
   (let [mode (or (first args) "square")
-        size (or (second args) 9)]
-    ; TODO tri and hexa board
-    (reset! game (cond
-                   (= "square" mode) (g/make-square-game size)
-                   (= "tri" mode) (g/make-tri-game size)
-                   (= "hexa" mode) (g/make-hexa-game size)))
-    (reset! cell-positions (cond
-                             (= "square" mode) (square-cell-positions)
-                             (= "tri" mode) (tri-cell-positions)
-                             (= "hexa" mode) (hexa-cell-positions)))
-    (reset! stone-size (/ board-width size)))
+        size (second args)
+        size (if (not= size nil) (Integer/parseInt size) 9)]
+    (cond
+      (= "square" mode) (do
+                          (reset! game (g/make-square-game size))
+                          (reset! cell-positions (make-cell-positions square-pos-to-screen))
+                          (reset! stone-size (/ board-width size)))
+      (= "hexa" mode) (do
+                        (reset! game (g/make-hexa-game size))
+                        (reset! cell-positions (make-cell-positions hexa-pos-to-screen))
+                        (reset! stone-size (/ board-width (inc (* 2 (dec size))))))))
   (q/defsketch hexago
                :title "Hexago"
                :size [width height]
