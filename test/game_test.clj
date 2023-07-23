@@ -5,11 +5,12 @@
 (deftest make-game
   (let [game (g/make-square-game 9)
         board (:board game)]
-    (is (every? #(contains? game %) [:turn :board :num-pass :score]))
+    (is (every? #(contains? game %) [:turn :board :num-pass :score :territory]))
     (is (= (:turn game) :black))
     (is (= (:board game) board))
     (is (= (:num-pass game) 0))
-    (is (= (:score game) {:white 6.5 :black 0}))))
+    (is (= (:score game) {:white 6.5 :black 0}))
+    (is (= (:territory game) {:white #{} :black #{}}))))
 
 (deftest get-cells
   (let [game (g/make-square-game 9)]

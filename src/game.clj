@@ -1,8 +1,9 @@
 (ns game
-  (:require [go :as g]))
+  (:require [clojure.set :as set]
+            [go :as g]))
 
 (defn make-game [board]
-  {:board board :turn :black :num-pass 0 :history [] :score {:white 6.5 :black 0}})
+  {:board board :turn :black :num-pass 0 :history [] :territory {:white #{} :black #{}} :score {:white 6.5 :black 0}})
 
 (defn make-square-game [size]
   (make-game (go/make-square-board size)))
@@ -53,5 +54,7 @@
       (update :history conj (:board game))))
 
 (defn score [game]
-  (let [s (g/score (:board game))]
-    (update game :score #(merge-with + s %))))
+  (let [{s :score t :territory} (g/score (:board game))]
+    (-> game
+      (update :score #(merge-with + s %))
+      (update :territory #(merge-with set/union t %)))))

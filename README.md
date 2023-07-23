@@ -6,5 +6,8 @@ Go, but on a hexagonal board
 # Prepare deps
 clj -X:deps prep
 # Run
-clj -m main
+# Square board
+clj -m main square 9
+# Hexagonal board
+clj -m main hexa 6
 ```

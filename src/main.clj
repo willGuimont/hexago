@@ -40,8 +40,7 @@
 
 ; Sketch functions
 (defn setup []
-  (q/frame-rate 30)
-  (q/smooth 2))
+  (q/frame-rate 30))
 
 (defn draw-lines []
   (q/stroke 0)
@@ -52,8 +51,8 @@
           (q/line x1 y1 x2 y2))))))
 
 (defn set-draw-color [turn & {:keys [transparency] :or {transparency 255}}]
-  (cond (= turn :black) (do (q/stroke 0 0 0 transparency) (q/fill 0 0 0 transparency))
-        (= turn :white) (do (q/stroke 0 0 0 transparency) (q/fill 255 255 255 transparency))))
+  (cond (= turn :black) (do (q/stroke 127 127 127 transparency) (q/fill 0 0 0 transparency))
+        (= turn :white) (do (q/stroke 127 127 127 transparency) (q/fill 255 255 255 transparency))))
 
 (defn draw-stones []
   (doseq [[pos [x y]] @cell-positions]
@@ -63,6 +62,15 @@
           (set-draw-color color :transparency 127)
           (set-draw-color color))
         (q/ellipse x y @stone-size @stone-size)))))
+
+(defn draw-territory []
+  (q/rect-mode :center)
+  (doseq [[pos [x y]] @cell-positions]
+    (doseq [[color ts] (:territory @game)]
+      (when (contains? ts pos)
+        (set-draw-color color)
+        (let [ss (/ @stone-size 3)]
+          (q/rect x y ss ss))))))
 
 (defn distance [x1 y1 x2 y2]
   (Math/sqrt (+ (Math/pow (- x2 x1) 2) (Math/pow (- y2 y1) 2))))
@@ -105,6 +113,7 @@
   (q/background 200)
   (draw-lines)
   (draw-stones)
+  (draw-territory)
   (draw-mouse-over)
   (draw-score)
   (draw-text))

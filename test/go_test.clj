@@ -87,5 +87,7 @@
         {board :board} (go/put-stone board [1 0] :black)
         {board :board} (go/put-stone board [0 1] :black)
         {board :board} (go/put-stone board [1 1] :black)
-        {board :board} (go/put-stone board [2 2] :white)]
-    (is (= (go/score board) {:black 1 :white 0}))))
+        {board :board} (go/put-stone board [2 2] :white)
+        score (go/score board)]
+    (is (= (:score score) {:black 1 :white 0}))
+    (is (= (:territory score) {:white #{} :black #{[0 0]}}))))

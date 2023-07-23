@@ -1,5 +1,6 @@
 (ns go
-  (:require [clojure.set :as s]
+  (:require [clojure.set :as set]
+            [clojure.set :as s]
             [graph :as g]))
 
 (defn make-board [graph size]
@@ -104,18 +105,20 @@
   (let [graph (:graph board)
         values (:values graph)
         empty-pos (atom (set (map (fn [[k _]] k) (filter (fn [[_ v]] (= nil v)) values))))
-        score (atom {:white 0 :black 0})]
+        score (atom {:score {:white 0 :black 0} :territory {:white #{} :black {}}})]
     (while (not-empty @empty-pos)
       (let [starting-pos (first @empty-pos)
             search (g/search graph starting-pos :value-predicate? #(= % nil))
             seen (:seen search)
-            num-empty (count (:visited search))
+            visited (:visited search)
+            num-empty (count visited)
             seen-pos (->> seen)
             seen-color (disj (->> (:seen search)
                                   (map (partial get-at board))
                                   (set)) nil)]
         (when (= 1 (count seen-color))
           (let [color (first seen-color)]
-            (swap! score update color + num-empty)))
+            (swap! score update-in [:score color] + num-empty)
+            (swap! score update-in [:territory color] set/union visited)))
         (swap! empty-pos s/difference seen-pos)))
     @score))
