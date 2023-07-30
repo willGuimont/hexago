@@ -4,7 +4,7 @@ Go, but on a hexagonal board.
 
 [Hexago in action on a hexagonal board](https://youtube.com/shorts/vjFOJuLwWyA?feature=share)
 
-[Hecago in action on a square board](https://youtube.com/shorts/pgtIYDKG8Rc?feature=share)
+[Hexago in action on a square board](https://youtube.com/shorts/pgtIYDKG8Rc?feature=share)
 
 ```bash
 # Prepare deps
